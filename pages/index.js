@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../public/globals.css";
 <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
 
 // Inisialisasi font
