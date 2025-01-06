@@ -1,18 +1,7 @@
 import { useEffect, useState } from "react";
-import dynamic from 'next/dynamic';
 import { Geist, Geist_Mono } from "next/font/google";
-import "../public/globals.css";
+import "./globals.css";
 <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
-// Dynamic import untuk Chart components
-const Line = dynamic(
-  () => import('react-chartjs-2').then(mod => mod.Line),
-  { ssr: false } // Disable server-side rendering
-);
-
-const Bar = dynamic(
-  () => import('react-chartjs-2').then(mod => mod.Bar),
-  { ssr: false }
-);
 
 // Inisialisasi font
 const geistSans = Geist({
@@ -37,16 +26,10 @@ function RootLayout({ children }) {
 // Komponen Home yang sekarang menjadi children dari RootLayout
 function Home() {
   const [data, setData] = useState(null);
-  const [historicalData, setHistoricalData] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [apiUrl, setApiUrl] = useState("");
   const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState("");
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -114,7 +97,6 @@ function Home() {
       // Stop fetching data ketika user klik disconnect
       setIsConnected(false);
       setData(null);
-      setHistoricalData([]);
     }
   };
 
