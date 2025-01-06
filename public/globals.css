@@ -1,0 +1,286 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #ffffff;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+.dashboard {
+  background-color: #fff0f5;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.title {
+  text-align: center;
+  color: #ff85c0;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.connection-bar {
+  background: #ffe4e1;
+  padding: 1rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.date, .time {
+  color: #000000;
+  font-weight: bold;
+}
+
+.connection-bar input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ffd1dc;
+  border-radius: 5px;
+}
+
+.connect-btn {
+  background: #ffa3b1;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.connection-bar input {
+  color: #000000;
+  font-weight: bold;
+  padding: 8px;
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.connection-bar input::placeholder {
+  color: #666666; /* Warna untuk placeholder text */
+}
+
+.status.connected {
+  color: #6a994e;
+}
+
+.status.disconnected {
+  color: #e63946;
+}
+
+.sensors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.sensor-card {
+  background: linear-gradient(135deg, #ffd1dc, #d1c4e9);
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.sensor-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.sensor-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #5c5c5c;
+}
+
+.averages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.average-card {
+  background: linear-gradient(135deg, #ffd1dc, #ffc1e3);
+  padding: 1.5rem;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.control-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.control-btn {
+  background: #ffa3b1;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.control-btn:hover {
+  background: #ff748c;
+}
+.control-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+
+/* Base styles */
+.dashboard {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Title */
+.title {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Connection bar */
+.connection-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 1rem;
+}
+
+.connection-bar input {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Sensors grid */
+.sensors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sensor-card {
+  padding: 1.5rem;
+}
+
+/* Averages grid */
+.averages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Control buttons */
+.control-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+/* Mobile responsive styles */
+@media screen and (max-width: 768px) {
+  .dashboard {
+    padding: 0.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .connection-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .connection-bar input,
+  .connection-bar button {
+    width: 100%;
+  }
+
+  .date, .time {
+    text-align: center;
+  }
+
+  .sensors-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .averages-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .control-buttons {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .control-btn {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-icon {
+    font-size: 1rem;
+  }
+
+  .sensor-card {
+    padding: 1rem;
+  }
+
+  .sensor-value {
+    font-size: 1.5rem;
+  }
+}
+
+/* Small mobile devices */
+@media screen and (max-width: 480px) {
+  .control-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .sensor-value {
+    font-size: 1.2rem;
+  }
+
+  .connection-bar {
+    padding: 0.8rem;
+  }
+}
