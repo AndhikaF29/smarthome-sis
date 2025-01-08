@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import dynamic from 'next/dynamic';
 import { Geist, Geist_Mono } from "next/font/google";
 import "../public/globals.css";
 <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
@@ -57,6 +58,7 @@ function RootLayout({ children }) {
 
 function Home() {
   const [data, setData] = useState(null);
+  const [historicalData, setHistoricalData] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [apiUrl, setApiUrl] = useState("");
   const [currentTime, setCurrentTime] = useState("");
@@ -130,6 +132,8 @@ function Home() {
       const response = await fetch(apiUrl);
       const result = await response.json();
       
+      console.log('API Response:', result);
+      
       if (result.success && result.data) {
         const sensorData = {
           gas: result.data.gas ?? 0,
@@ -137,16 +141,17 @@ function Home() {
           temperature: result.data.temperature ?? 0
         };
         
+        console.log('Processed Data:', sensorData);
         setData(sensorData);
         setHistoricalData(prev => [...prev, sensorData].slice(-10));
         setIsConnected(true);
       } else {
-        throw new Error('Format data tidak valid');
+        throw new Error('Invalid data format');
       }
     } catch (error) {
-      console.error("Error mengambil data:", error);
+      console.error("Error fetching data:", error);
       setIsConnected(false);
-      alert("Gagal mengambil data. Silakan periksa URL API Anda.");
+      alert("Failed to fetch data. Please check your API URL.");
     }
   };
 
