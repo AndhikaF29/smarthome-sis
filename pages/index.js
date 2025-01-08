@@ -3,10 +3,32 @@ import dynamic from 'next/dynamic';
 import { Geist, Geist_Mono } from "next/font/google";
 import "../public/globals.css";
 <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
+import mqtt from 'mqtt';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
 // Dynamic import untuk Chart components
 const Line = dynamic(
   () => import('react-chartjs-2').then(mod => mod.Line),
-  { ssr: false } // Disable server-side rendering
+  { ssr: false }
 );
 
 const Bar = dynamic(
@@ -21,20 +43,19 @@ const geistSans = Geist({
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+  variable: "--font-geist-mono", 
   subsets: ["latin"],
 });
 
-// Komponen layout utama
+// Komponen layout utama dengan animasi gradient background
 function RootLayout({ children }) {
   return (
-    <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <div className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient`}>
       {children}
     </div>
   );
 }
 
-// Komponen Home yang sekarang menjadi children dari RootLayout
 function Home() {
   const [data, setData] = useState(null);
   const [historicalData, setHistoricalData] = useState([]);
@@ -43,6 +64,8 @@ function Home() {
   const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState("");
   const [isClient, setIsClient] = useState(false);
+  const [mqttStatus, setMqttStatus] = useState('');
+  const [mqttClient, setMqttClient] = useState(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -51,31 +74,63 @@ function Home() {
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
-      setCurrentTime(now.toLocaleTimeString('en-US', { 
+      setCurrentTime(now.toLocaleTimeString('id-ID', {
         hour12: false,
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
       }));
-      setCurrentDate(now.toLocaleDateString('en-US', {
-        year: '2-digit',
-        month: '2-digit',
-        day: '2-digit'
+      setCurrentDate(now.toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       }));
     }, 1000);
 
     return () => clearInterval(timer);
   }, []);
 
-  // Modifikasi fetch data untuk handle berbagai format response
+  useEffect(() => {
+    const client = mqtt.connect('ws://broker.hivemq.com:8000/mqtt');
+    
+    client.on('connect', () => {
+      console.log('Terhubung ke MQTT Broker');
+      setMqttClient(client);
+      setMqttStatus('Terhubung ke MQTT Broker ✅');
+    });
+
+    client.on('error', (error) => {
+      console.error('Error Koneksi MQTT:', error);
+      setMqttStatus('Gagal terhubung ke MQTT ❌');
+    });
+
+    return () => {
+      client.end();
+    };
+  }, []);
+
+  const sendMqttCommand = (command) => {
+    if (!mqttClient) {
+      setMqttStatus('MQTT belum terhubung ⚠️');
+      return;
+    }
+
+    mqttClient.publish('esp32/mq2', command, (err) => {
+      if (err) {
+        setMqttStatus('Gagal mengirim perintah ❌');
+        console.error('Error pengiriman pesan MQTT:', err);
+      } else {
+        setMqttStatus(`Perintah "${command}" berhasil dikirim ✅`);
+      }
+    });
+  };
+
   const fetchData = async () => {
     if (!apiUrl) return;
     
     try {
       const response = await fetch(apiUrl);
       const result = await response.json();
-      
-      console.log('API Response:', result);
       
       if (result.success && result.data) {
         const sensorData = {
@@ -84,131 +139,245 @@ function Home() {
           temperature: result.data.temperature ?? 0
         };
         
-        console.log('Processed Data:', sensorData);
         setData(sensorData);
+        setHistoricalData(prev => [...prev, sensorData].slice(-10));
         setIsConnected(true);
       } else {
-        throw new Error('Invalid data format');
+        throw new Error('Format data tidak valid');
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error mengambil data:", error);
       setIsConnected(false);
-      alert("Failed to fetch data. Please check your API URL.");
+      alert("Gagal mengambil data. Silakan periksa URL API Anda.");
     }
   };
 
-  // Handle connect button click
   const handleConnect = () => {
     if (!apiUrl) {
-      alert("Please enter API URL first");
+      alert("Silakan masukkan URL API terlebih dahulu");
       return;
     }
 
     if (!isConnected) {
-      // Mulai fetching data ketika user klik connect
       fetchData();
       const interval = setInterval(fetchData, 1000);
       setIsConnected(true);
       return () => clearInterval(interval);
     } else {
-      // Stop fetching data ketika user klik disconnect
       setIsConnected(false);
       setData(null);
       setHistoricalData([]);
     }
   };
 
-  // Render UI
   return (
-    <div className="dashboard">
-      <h1 className="title">
-        <span className="icon">🏠</span>
-        IoT Sensor Dashboard
+    <div className="dashboard modern-theme">
+      <h1 className="title glow-text">
+        <span className="icon rotate-icon">🏠</span>
+        Smart Home Control Center
+        <span className="subtitle pulse-animation">IoT Dashboard v2.0</span>
       </h1>
 
-      <div className="connection-bar">
-        <span className="date">{currentDate}</span>
-        <span className="time">{currentTime}</span>
-        <input 
-          type="text" 
-          placeholder="Enter API URL"
-          value={apiUrl}
-          onChange={(e) => setApiUrl(e.target.value)}
-        />
-        <button 
-          className={`connect-btn ${isConnected ? 'connected' : ''}`}
-          onClick={handleConnect}
-        >
-          {isConnected ? 'Disconnect' : 'Connect'}
-        </button>
-        <span className={`status ${isConnected ? 'connected' : 'disconnected'}`}>
-          {isConnected ? 'Connected' : 'Disconnected'}
-        </span>
-      </div>
-
-      <div className="sensors-grid">
-        <div className="sensor-card">
-          <div className="sensor-icon">⛽</div>
-          <div className="sensor-label">Gas Level:</div>
-          <div className="sensor-value">{data?.gas || 0}%</div>
+      <div className="connection-bar glass-morphism">
+        <div className="connection-info">
+          <span className="date-time fade-in">
+            <span className="icon bounce">📅</span> {currentDate}
+            <span className="icon clock spin">⏰</span> {currentTime}
+          </span>
         </div>
-
-        <div className="sensor-card">
-          <div className="sensor-icon">💧</div>
-          <div className="sensor-label">Humidity:</div>
-          <div className="sensor-value">{data?.humidity || 0}%</div>
-        </div>
-
-        <div className="sensor-card">
-          <div className="sensor-icon">🌡️</div>
-          <div className="sensor-label">Temperature:</div>
-          <div className="sensor-value">{data?.temperature || 0}°C</div>
+        <div className="connection-controls">
+          <input 
+            type="text"
+            placeholder="Masukkan URL API Anda..."
+            value={apiUrl}
+            onChange={(e) => setApiUrl(e.target.value)}
+            className="api-input modern-input"
+          />
+          <button 
+            className={`connect-btn ${isConnected ? 'connected pulse' : 'hover-effect'}`}
+            onClick={handleConnect}
+          >
+            {isConnected ? '🔴 Disconnect' : '🟢 Connect'}
+          </button>
         </div>
       </div>
 
-      <div className="averages-grid">
-        <div className="average-card">
-          <div className="average-icon">📊</div>
-          <div className="average-label">Daily Average</div>
-          <div className="average-value">0</div>
+      <div className="sensors-grid animate-in">
+        <div className="sensor-card glass-morphism hover-lift">
+          <div className="sensor-header">
+            <div className="sensor-icon gas pulse">⛽</div>
+            <div className="sensor-label">Gas Level</div>
+          </div>
+          <div className="sensor-value glow">{data?.gas || 0}
+            <span className="unit">PPM</span>
+          </div>
         </div>
 
-        <div className="average-card">
-          <div className="average-icon">📈</div>
-          <div className="average-label">Weekly Average</div>
-          <div className="average-value">0</div>
+        <div className="sensor-card glass-morphism hover-lift">
+          <div className="sensor-header">
+            <div className="sensor-icon humidity wave">💧</div>
+            <div className="sensor-label">Humidity</div>
+          </div>
+          <div className="sensor-value glow">{data?.humidity || 0}
+            <span className="unit">%</span>
+          </div>
         </div>
 
-        <div className="average-card">
-          <div className="average-icon">📅</div>
-          <div className="average-label">Monthly Average</div>
-          <div className="average-value">0</div>
+        <div className="sensor-card glass-morphism hover-lift">
+          <div className="sensor-header">
+            <div className="sensor-icon temperature pulse">🌡️</div>
+            <div className="sensor-label">Temperature</div>
+          </div>
+          <div className="sensor-value glow">{data?.temperature || 0}
+            <span className="unit">°C</span>
+          </div>
+        </div>
+
+        <div className="sensor-card glass-morphism hover-lift">
+          <div className="sensor-header">
+            <div className={`sensor-icon flame ${data?.flame === 1 ? 'danger-flicker' : ''}`}>
+              {data?.flame === 1 ? '🔥' : '🚫'}
+            </div>
+            <div className="sensor-label">Fire Status</div>
+          </div>
+          <div className={`sensor-value ${data?.flame === 1 ? 'danger-text' : 'safe-text'}`}>
+            {data?.flame === 1 ? 'KEBAKARAN!' : 'AMAN'}
+            <div className={`status-indicator ${data?.flame === 1 ? 'warning-blink' : ''}`}>
+              {data?.flame === 1 ? '🚨' : '✅'}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="control-buttons">
-        <button className="control-btn">
-          <span className="btn-icon">🌬️</span>
-          Nyalakan Kipas
-        </button>
-        <button className="control-btn">
-          <span className="btn-icon">⭕</span>
-          Matikan Kipas
-        </button>
-        <button className="control-btn">
-          <span className="btn-icon">🚪</span>
-          Buka Pintu
-        </button>
-        <button className="control-btn">
-          <span className="btn-icon">🔒</span>
-          Tutup Pintu
-        </button>
+      <div className="control-section glass-morphism">
+        <h2 className="section-title glow-text" style={{ textAlign: 'center' }}>Smart Control Panel</h2>
+        <div className="control-buttons">
+          <button className="control-btn neo-btn" onClick={() => sendMqttCommand('fan on')}>
+            <span className="btn-icon spin">🌬️</span>
+            <span className="btn-text">Nyalakan Kipas</span>
+          </button>
+          <button className="control-btn neo-btn" onClick={() => sendMqttCommand('fan off')}>
+            <span className="btn-icon pulse">⭕</span>
+            <span className="btn-text">Matikan Kipas</span>
+          </button>
+          <button className="control-btn neo-btn" onClick={() => sendMqttCommand('open door')}>
+            <span className="btn-icon swing">🚪</span>
+            <span className="btn-text">Buka Pintu</span>
+          </button>
+          <button className="control-btn neo-btn" onClick={() => sendMqttCommand('close door')}>
+            <span className="btn-icon bounce">🔒</span>
+            <span className="btn-text">Tutup Pintu</span>
+          </button>
+        </div>
+        <div className={`mqtt-status ${mqttStatus ? 'active fade-in' : ''}`}>
+          <span className="status-icon pulse">📡</span>
+          {mqttStatus || 'Menunggu perintah...'}
+        </div>
       </div>
+
+      {isClient && historicalData.length > 0 && (
+        <div className="charts-grid glass-morphism">
+          <div className="chart-container">
+            <h3 className="chart-title">Gas Level History</h3>
+            <Line
+              data={{
+                labels: historicalData.map((_, index) => index + 1),
+                datasets: [{
+                  label: 'Gas Level (PPM)',
+                  data: historicalData.map(d => d.gas),
+                  borderColor: 'rgba(255, 99, 132, 1)',
+                  backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                  tension: 0.4
+                }]
+              }}
+              options={{
+                responsive: true,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    grid: {
+                      color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                  },
+                  x: {
+                    grid: {
+                      color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                  }
+                }
+              }}
+            />
+          </div>
+
+          <div className="chart-container">
+            <h3 className="chart-title">Temperature History</h3>
+            <Line
+              data={{
+                labels: historicalData.map((_, index) => index + 1),
+                datasets: [{
+                  label: 'Temperature (°C)',
+                  data: historicalData.map(d => d.temperature),
+                  borderColor: 'rgba(255, 159, 64, 1)',
+                  backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                  tension: 0.4
+                }]
+              }}
+              options={{
+                responsive: true,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    grid: {
+                      color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                  },
+                  x: {
+                    grid: {
+                      color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                  }
+                }
+              }}
+            />
+          </div>
+
+          <div className="chart-container">
+            <h3 className="chart-title">Humidity History</h3>
+            <Line
+              data={{
+                labels: historicalData.map((_, index) => index + 1),
+                datasets: [{
+                  label: 'Humidity (%)',
+                  data: historicalData.map(d => d.humidity),
+                  borderColor: 'rgba(75, 192, 192, 1)',
+                  backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                  tension: 0.4
+                }]
+              }}
+              options={{
+                responsive: true,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    grid: {
+                      color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                  },
+                  x: {
+                    grid: {
+                      color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                  }
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// Render Home sebagai children dari RootLayout
 export default function App() {
   return (
     <RootLayout>

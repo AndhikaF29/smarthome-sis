@@ -1,37 +1,57 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #ededed;
-  }
+/* Reset dan base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  background: #f0f2f5;
+  color: #171717;
+  line-height: 1.6;
 }
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.chart-container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.chart-container:hover {
+  transform: translateY(-5px);
+}
+
+.chart-title {
+  text-align: center;
+  color: #fff;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+/* Dashboard layout */
 .dashboard {
-  background-color: #fff0f5;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
   min-height: 100vh;
-  padding: 2rem;
 }
 
 .title {
   text-align: center;
-  color: #ff85c0;
   font-size: 2.5rem;
   margin-bottom: 2rem;
+  color: #ff85c0;
 }
 
+/* Connection bar */
 .connection-bar {
   background: #ffe4e1;
   padding: 1rem;
@@ -42,16 +62,13 @@ body {
   margin-bottom: 2rem;
 }
 
-.date, .time {
-  color: #000000;
-  font-weight: bold;
-}
-
 .connection-bar input {
   flex: 1;
   padding: 0.5rem;
   border: 1px solid #ffd1dc;
   border-radius: 5px;
+  color: #000000;
+  font-weight: bold;
 }
 
 .connect-btn {
@@ -63,70 +80,87 @@ body {
   cursor: pointer;
 }
 
-.status {
+/* Time display */
+.time-display {
+  text-align: center;
+  margin: 1rem 0;
+  font-size: 1.2rem;
+}
+
+.time-display .date,
+.time-display .time {
+  margin: 0 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffd1dc;
+  border-radius: 4px;
+  color: #000;
   font-weight: bold;
 }
 
-.connection-bar input {
-  color: #000000;
-  font-weight: bold;
-  padding: 8px;
-  width: 100%;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+/* Charts section */
+.charts-section {
+  margin: 2rem 0;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.connection-bar input::placeholder {
-  color: #666666; /* Warna untuk placeholder text */
-}
-
-.status.connected {
-  color: #6a994e;
-}
-
-.status.disconnected {
-  color: #e63946;
-}
-
-.sensors-grid {
+.charts-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
-  margin-bottom: 2rem;
+}
+
+.chart-wrapper {
+  background: linear-gradient(135deg, #fff5f7, #fff);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Sensors grid */
+.sensors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .sensor-card {
   background: linear-gradient(135deg, #ffd1dc, #d1c4e9);
-  padding: 2rem;
+  padding: 1rem;
   border-radius: 10px;
   text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.sensor-header {
+  margin-bottom: 0.5rem;
 }
 
 .sensor-icon {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.sensor-label {
+  font-size: 0.9rem;
+  color: #8892b0;
 }
 
 .sensor-value {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: bold;
   color: #5c5c5c;
 }
 
-.averages-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
+.unit {
+  font-size: 0.8rem;
+  margin-left: 0.3rem;
 }
 
-.average-card {
-  background: linear-gradient(135deg, #ffd1dc, #ffc1e3);
-  padding: 1.5rem;
-  border-radius: 10px;
-  text-align: center;
-}
-
+/* Control buttons */
 .control-buttons {
   display: flex;
   justify-content: center;
@@ -142,145 +176,138 @@ body {
   border-radius: 5px;
   cursor: pointer;
   transition: background 0.3s ease;
-}
-
-.control-btn:hover {
-  background: #ff748c;
-}
-.control-btn {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.btn-icon {
-  font-size: 1.2rem;
+.control-btn:hover {
+  background: #ff748c;
 }
 
+.control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-/* Base styles */
-.dashboard {
+.control-btn.active {
+  background-color: #4CAF50;
+}
+
+/* MQTT Status */
+.mqtt-status {
+  text-align: center;
   padding: 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  margin-top: 1.5rem;
 }
 
-/* Title */
-.title {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
+.mqtt-status.active {
+  background: rgba(74, 144, 226, 0.1);
+  color: #4a90e2;
 }
 
-/* Connection bar */
-.connection-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 1rem;
-}
-
-.connection-bar input {
-  flex: 1;
-  min-width: 200px;
-}
-
-/* Sensors grid */
-.sensors-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.sensor-card {
-  padding: 1.5rem;
-}
-
-/* Averages grid */
-.averages-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-/* Control buttons */
-.control-buttons {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1rem;
-}
-
-/* Mobile responsive styles */
+/* Responsive */
 @media screen and (max-width: 768px) {
   .dashboard {
     padding: 0.5rem;
   }
-
-  .title {
-    font-size: 1.5rem;
-    text-align: center;
-  }
-
+  
   .connection-bar {
     flex-direction: column;
-    align-items: stretch;
   }
-
+  
   .connection-bar input,
   .connection-bar button {
     width: 100%;
   }
-
-  .date, .time {
-    text-align: center;
-  }
-
+  
+  .charts-container,
   .sensors-grid {
     grid-template-columns: 1fr;
   }
-
-  .averages-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .control-buttons {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .control-btn {
-    padding: 0.8rem;
-    font-size: 0.9rem;
-  }
-
-  .btn-icon {
-    font-size: 1rem;
-  }
-
-  .sensor-card {
-    padding: 1rem;
-  }
-
-  .sensor-value {
-    font-size: 1.5rem;
+  
+  .title {
+    font-size: 1.8rem;
   }
 }
 
-/* Small mobile devices */
 @media screen and (max-width: 480px) {
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .sensor-value {
+    font-size: 1.5rem;
+  }
+  
   .control-buttons {
     grid-template-columns: 1fr;
   }
+}
 
-  .title {
-    font-size: 1.2rem;
-  }
+/* Styling untuk Flame Sensor */
+.flame {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
 
-  .sensor-value {
-    font-size: 1.2rem;
-  }
+.danger-flicker {
+  animation: flicker 0.5s ease-in-out infinite alternate;
+}
 
-  .connection-bar {
-    padding: 0.8rem;
+.danger-text {
+  color: #ff3333 !important;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(255, 51, 51, 0.7);
+}
+
+.safe-text {
+  color: #33ff33 !important;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(51, 255, 51, 0.7);
+}
+
+.status-indicator {
+  font-size: 1.2rem;
+  margin-top: 0.3rem;
+}
+
+.warning-blink {
+  animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes flicker {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1.1);
   }
+  50% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Khusus untuk card flame sensor */
+.sensor-card:last-child {
+  background: linear-gradient(145deg, 
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 51, 51, 0.1) 100%
+  );
+  border: 1px solid rgba(255, 51, 51, 0.2);
+}
+
+.sensor-card:last-child:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(255, 51, 51, 0.2);
 }
