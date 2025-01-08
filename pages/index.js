@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import dynamic from 'next/dynamic';
 import { Geist, Geist_Mono } from "next/font/google";
 import "../public/globals.css";
 <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
@@ -58,7 +57,6 @@ function RootLayout({ children }) {
 
 function Home() {
   const [data, setData] = useState(null);
-  const [historicalData, setHistoricalData] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [apiUrl, setApiUrl] = useState("");
   const [currentTime, setCurrentTime] = useState("");
@@ -166,7 +164,6 @@ function Home() {
     } else {
       setIsConnected(false);
       setData(null);
-      setHistoricalData([]);
     }
   };
 
