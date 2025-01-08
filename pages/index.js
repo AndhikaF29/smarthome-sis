@@ -1,8 +1,9 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import dynamic from 'next/dynamic';
 import { Geist, Geist_Mono } from "next/font/google";
 import "../public/globals.css";
-import mqtt from 'mqtt';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -56,7 +57,6 @@ function Home() {
   const [currentDate, setCurrentDate] = useState("");
   const [isClient, setIsClient] = useState(false);
   const [mqttStatus, setMqttStatus] = useState('');
-  const [mqttClient, setMqttClient] = useState(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -81,39 +81,8 @@ function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    const client = mqtt.connect('ws://broker.hivemq.com:8000/mqtt');
-    
-    client.on('connect', () => {
-      console.log('Terhubung ke MQTT Broker');
-      setMqttClient(client);
-      setMqttStatus('Terhubung ke MQTT Broker ✅');
-    });
-
-    client.on('error', (error) => {
-      console.error('Error Koneksi MQTT:', error);
-      setMqttStatus('Gagal terhubung ke MQTT ❌');
-    });
-
-    return () => {
-      client.end();
-    };
-  }, []);
-
   const sendMqttCommand = (command) => {
-    if (!mqttClient) {
-      setMqttStatus('MQTT belum terhubung ⚠️');
-      return;
-    }
-
-    mqttClient.publish('esp32/mq2', command, (err) => {
-      if (err) {
-        setMqttStatus('Gagal mengirim perintah ❌');
-        console.error('Error pengiriman pesan MQTT:', err);
-      } else {
-        setMqttStatus(`Perintah "${command}" berhasil dikirim ✅`);
-      }
-    });
+    setMqttStatus(`Perintah "${command}" tidak dapat diproses - MQTT tidak aktif ⚠️`);
   };
 
   const fetchData = async () => {
