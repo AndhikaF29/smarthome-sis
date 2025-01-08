@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import dynamic from 'next/dynamic';
 import { Geist, Geist_Mono } from "next/font/google";
 import "../public/globals.css";
-<meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
 import mqtt from 'mqtt';
 import {
   Chart as ChartJS,
@@ -25,18 +24,11 @@ ChartJS.register(
   Legend
 );
 
-// Dynamic import untuk Chart components
 const Line = dynamic(
   () => import('react-chartjs-2').then(mod => mod.Line),
   { ssr: false }
 );
 
-const Bar = dynamic(
-  () => import('react-chartjs-2').then(mod => mod.Bar),
-  { ssr: false }
-);
-
-// Inisialisasi font
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -47,7 +39,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Komponen layout utama dengan animasi gradient background
 function RootLayout({ children }) {
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient`}>
